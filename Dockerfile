@@ -1,19 +1,32 @@
-FROM python:3.9.5-slim-buster
+FROM python:3.9.5-slim-buster as base
+LABEL maintainer "Andrew Bilenduke <andrewbilenduke@gmail.com>"
 
-ENV APP_ROOT /var/www/flask_backend
+RUN apt-get update
+
+ENV APP_ROOT="/var/www/flask_backend"
+ENV FLASK_APP="${APP_ROOT}/wsgi.py"
 
 WORKDIR ${APP_ROOT}
+
+COPY ./requirements.txt ./requirements.txt
+
+RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip
+
+EXPOSE 5000
+
+# DEBUG BUILD
+FROM base as development
+
+RUN pip install debugpy
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN pip install --upgrade pip
+CMD [ "python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "flask", "run", "-h", "0.0.0.0", "-p", "5000" ]
 
-COPY requirements.txt .
-
-RUN pip3 install --no-cache-dir -r requirements.txt
-
+# PRODUCTION BUILD
+FROM gunicorn as production
+RUN pip install gunicorn
 COPY . .
-
-# ENTRYPOINT ["${APP_ROOT}/entrypoint.sh"]
-# ENTRYPOINT ["/var/www/flask_backend/entrypoint.sh"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]
