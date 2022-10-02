@@ -3,7 +3,6 @@ import os
 from app import create_app
 
 environment = os.getenv("FLASK_ENV") or "production"
-
 app = create_app(environment)
 
 if __name__ == "__main__":
