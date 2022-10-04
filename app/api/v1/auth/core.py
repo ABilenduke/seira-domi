@@ -2,12 +2,12 @@ from flask import request, current_app, jsonify, Blueprint
 from flask_accept import accept
 from pydantic import ValidationError
 
-from .... import bcrypt
-from ....api.common.utils.exceptions import InvalidPayloadException, NotFoundException, \
+from app.extensions import bcrypt
+from app.api.common.utils.exceptions import InvalidPayloadException, NotFoundException, \
     ServerErrorException, ValidationException
-from ....api.common.utils.decorators import authenticate, privileges
-from ....models.user import User
-from ....api.common.utils.helpers import session_scope
+from app.api.common.utils.decorators import authenticate, privileges
+from app.models.user import User
+from app.api.common.utils.helpers import session_scope
 from .validators import UserRegister, UserLogin, PasswordChange, PasswordReset, PasswordRecovery
 
 auth_core_blueprint = Blueprint('auth_core', __name__)
@@ -39,6 +39,7 @@ def register_user():
         ).decode()
 
         data['password'] = encrypted_password
+        data.pop('password_confirmation')
 
         new_user = User(**data)
 
@@ -48,10 +49,10 @@ def register_user():
         # new_user.save()
 
         if not current_app.testing:
-            from ....api.common.utils.mail import send_registration_email
+            from app.api.common.utils.mail import send_registration_email
             send_registration_email(new_user, email_token)
 
-        new_user.save()
+        # new_user.save()
 
         # with session_scope(db.session) as session:
         # session.add(user)

@@ -7,8 +7,8 @@ from typing import Optional
 from datetime import datetime, timedelta
 from redis_om import JsonModel, Field
 
-from .. import bcrypt
-from ..api.common.utils.exceptions import UnauthorizedException, BadRequestException
+from app.extensions import bcrypt
+from app.api.common.utils.exceptions import UnauthorizedException, BadRequestException
 
 class SocialAuth(Enum):
     """

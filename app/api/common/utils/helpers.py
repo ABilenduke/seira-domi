@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import current_app, request
 from urllib import parse
 
-from ....api.common.utils.exceptions import (
+from app.api.common.utils.exceptions import (
     ServerErrorException,
     InvalidPayloadException,
     NotFoundException,

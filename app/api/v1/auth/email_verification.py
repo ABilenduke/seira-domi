@@ -2,10 +2,10 @@ from datetime import datetime
 from flask import current_app, jsonify, Blueprint
 from flask_accept import accept
 
-from .... import bcrypt
-from ....api.common.utils.exceptions import NotFoundException, InvalidPayloadException
-from ....api.common.utils.decorators import authenticate
-from ....models.user import User
+from app.extensions import bcrypt
+from app.api.common.utils.exceptions import NotFoundException, InvalidPayloadException
+from app.api.common.utils.decorators import authenticate
+from app.models.user import User
 
 email_verification_blueprint = Blueprint('email_verification', __name__)
 

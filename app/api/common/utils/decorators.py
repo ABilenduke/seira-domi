@@ -1,8 +1,8 @@
 from flask import request, current_app
 from functools import wraps
 
-from ....api.common.utils.exceptions import UnauthorizedException, ForbiddenException
-from ....models.user import User #, UserRole
+from app.api.common.utils.exceptions import UnauthorizedException, ForbiddenException
+from app.models.user import User #, UserRole
 
 def privileges(role):
     """

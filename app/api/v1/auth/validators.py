@@ -1,13 +1,20 @@
 from pydantic import BaseModel, EmailStr, validator
-from ....models.user import User
+from app.models.user import User
 
 
 class UserRegister(BaseModel):
+    name: str
     email: EmailStr
     username: str
     password: str
     password_confirmation: str
     name: str
+
+    @validator('name')
+    def validate_name(cls, name):
+        if not name:
+            raise ValueError('a name is required')
+        return name
 
     @validator('email')
     def validate_email(cls, email):
@@ -17,6 +24,8 @@ class UserRegister(BaseModel):
 
     @validator('username')
     def validate_username(cls, username):
+        if not username:
+            raise ValueError('a username is required')
         if not username.isalnum():
             raise ValueError('username must be alphanumeric')
         if User.exists(User.username == username):
@@ -25,6 +34,8 @@ class UserRegister(BaseModel):
 
     @validator('password_confirmation')
     def confirm_password(cls, password_confirmation, values, **kwargs):
+        if not password_confirmation:
+            raise ValueError('you must confirm your password')
         if 'password' in values and password_confirmation != values['password']:
             raise ValueError('passwords do not match')
         return password_confirmation
@@ -69,3 +80,4 @@ class PasswordReset(BaseModel):
 
 class PasswordRecovery(BaseModel):
     email: EmailStr
+    

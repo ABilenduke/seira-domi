@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Andrew Bilenduke",
+    "email": "andrew8@test.com",
+    "username": "andyman8",
+    "password": "Test@1234!",
+    "password_confirmation": "Test@1234!"
+  },
+  {
+    "name": "Jonathon Hou",
+    "email": "jonathon@test.com",
+    "username": "jonathonhou",
+    "password": "Test@1234!",
+    "password_confirmation": "Test@1234!"
+  }
+]

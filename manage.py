@@ -1,35 +1,70 @@
-import os
-from flask_script import Manager
+import coverage, json, requests, os
+from redis_om import Migrator
 
-from app import create_app, db
-from commands.seed_command import SeedCommand
+COV = coverage.coverage(
+    branch=True,
+    include='app/*',
+    omit=[
+        'app/static/*'
+    ]
+)
+COV.start()
 
-env = os.getenv("FLASK_ENV") or "test"
-print(f"Active environment: * {env} *")
-app = create_app(env)
+from flask.cli import FlaskGroup
+import click
 
-manager = Manager(app)
-app.app_context().push()
-manager.add_command("seed_db", SeedCommand)
+from app import create_app
+from app.models.user import User
 
+import unittest
 
-@manager.command
-def run():
-    app.run()
-
-
-@manager.command
-def init_db():
-    print("Creating all resources.")
-    db.create_all()
+# environment = os.getenv("FLASK_ENV") or "production"
+app = create_app()
+cli = FlaskGroup(app)
 
 
-@manager.command
-def drop_all():
-    if input("Are you sure you want to drop all tables? (y/N)\n").lower() == "y":
-        print("Dropping tables...")
-        db.drop_all()
+@cli.command()
+def seed():
+    with open('dev/db/seeds/users.json', encoding='utf-8') as f:
+        users = json.loads(f.read())
+
+    for user in users:
+        r = requests.post('https://backend.flask-redis.test/v1/auth/register', json = user)
+        print(f"Created person {user['name']} with ID {r.text}")
+    
+    print("Creating DB Indexes.")
+    Migrator.run()
+
+@cli.command()
+@click.argument('file', required=False)
+def test(file):
+    """
+    Run the tests without code coverage
+    """
+    pattern = 'test_*.py' if file is None else file
+    tests = unittest.TestLoader().discover('tests', pattern=pattern)
+    result = unittest.TextTestRunner(verbosity=2).run(tests)
+    if result.wasSuccessful():
+        return 0
+    return 1
+
+@cli.command()
+def cov():
+    """
+    Run the unit tests with coverage
+    """
+    tests = unittest.TestLoader().discover('tests')
+    result = unittest.TextTestRunner(verbosity=2).run(tests)
+    if result.wasSuccessful():
+        COV.stop()
+        COV.save()
+        print('Coverage Summary:')
+        COV.report()
+        COV.html_report()
+        COV.erase()
+        return 0
+    return 1
 
 
 if __name__ == "__main__":
-    manager.run()
+    cli()
