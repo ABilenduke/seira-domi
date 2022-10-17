@@ -34,18 +34,20 @@ def verify_email(token):
     """
     Verifies email with given token
     """
+    print('HI!')
     user_id = User.decode_email_token(token)
-    user = User.get(user_id)
-    if not user:
-        raise NotFoundException(message='user does not exist')
-    if not user.email_token_hash:
-        raise InvalidPayloadException(message='verification link expired')
+    print(user_id)
+    # user = User.get(user_id)
+    # if not user:
+    #     raise NotFoundException(message='user does not exist')
+    # if not user.email_token_hash:
+    #     raise InvalidPayloadException(message='verification link expired')
 
-    bcrypt.check_password_hash(user.email_token_hash, token)
+    # bcrypt.check_password_hash(user.email_token_hash, token)
 
-    user.email_validation_date = datetime.utcnow()
-    user.active = True
-    user.email_token_hash = None
+    # user.email_validation_date = datetime.utcnow()
+    # user.active = True
+    # user.email_token_hash = None
 
     return jsonify(message='email verified')
 

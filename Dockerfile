@@ -25,7 +25,7 @@ ENV PYTHONUNBUFFERED 1
 
 EXPOSE 5678
 
-CMD [ "python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "flask", "run", "-h", "0.0.0.0", "-p", "5000", "celery", "--app", "app.celery_worker.celery", "worker", "--loglevel=info", "--logfile=app/logs/celery.log" ]
+CMD [ "python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "flask", "run", "-h", "0.0.0.0", "-p", "5000" ]
 
 # PRODUCTION BUILD
 FROM base as production

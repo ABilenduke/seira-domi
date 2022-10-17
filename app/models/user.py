@@ -67,7 +67,7 @@ class User(JsonModel):
     #     """
     #     pass
 
-    def encode_auth_token(self) -> str:
+    def encode_auth_token(self) -> bytes:
         """
         Generates the auth token
         """
@@ -76,7 +76,7 @@ class User(JsonModel):
                 days=current_app.config['TOKEN_EXPIRATION_DAYS'],
                 seconds=current_app.config['TOKEN_EXPIRATION_SECONDS']),
             'iat': datetime.utcnow(),
-            'sub': self.id
+            'sub': self.pk
         }
         return jwt.encode(
             payload,
@@ -97,7 +97,7 @@ class User(JsonModel):
         except jwt.InvalidTokenError:
             raise UnauthorizedException(message='Invalid token. Please log in again.')
     
-    def get_encoded_email_token(self) -> bytes:
+    def encoded_email_token(self) -> bytes:
         """
         Generates the email token
         """

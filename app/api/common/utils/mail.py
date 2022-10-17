@@ -7,7 +7,7 @@ def send_registration_email(user, token):
     """
     Send email for registration
     """
-    url_root = "https://flask-redis.test/auth/register?r=" + token # request.url_root
+    url_root = "https://flask-redis.test/auth/verify?token=" + token # request.url_root
     href = url_root + url_for('email_verification.verify_email', token='')[1:] + token
     app_name = current_app.config.get('APP_NAME')
     send_async_registration_email.delay(

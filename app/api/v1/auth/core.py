@@ -43,36 +43,24 @@ def register_user():
 
         new_user = User(**data)
 
-        email_token = new_user.get_encoded_email_token()
-        new_user.email_token_hash = email_token
+        email_token = new_user.encoded_email_token()
+        new_user.email_token_hash = bcrypt.generate_password_hash(
+            email_token,
+            current_app.config.get('BCRYPT_LOG_ROUNDS')
+        ).decode()
 
-        # new_user.save()
+        new_user.save()
 
         if not current_app.testing:
             from app.api.common.utils.mail import send_registration_email
             send_registration_email(new_user, email_token)
 
-        # new_user.save()
-
-        # with session_scope(db.session) as session:
-        # session.add(user)
-
-        # with session_scope(db.session) as session:
-        # token = user.encode_email_token()
-        # user.email_token_hash = bcrypt.generate_password_hash(token, current_app.config.get(
-        #     'BCRYPT_LOG_ROUNDS')).decode()
-
-        # if not current_app.testing:
-        #     from ....api.common.utils.mails import send_registration_email
-        #     send_registration_email(user, token.decode())
-
         # Generate auth token
-        # auth_token = user.encode_auth_token()
+        auth_token = new_user.encode_auth_token()
 
-        return jsonify(message='Successfully registered.'), 201
+        return jsonify(message='Successfully registered.', auth_token=auth_token), 201
     except Exception as err:
         print(err)
-        # session.rollback()
         raise ServerErrorException()
 
 
@@ -88,16 +76,16 @@ def login_user():
 
     try:
         data = UserLogin(**post_data)
-    except ValidationError as e:
-        raise ValidationException(e)
+    except ValidationError as err:
+        raise ValidationException(err)
 
-    user = User.first_by(email=data.email)
+    user = User.find(User.email==data.email).first()
     if not user:
         raise NotFoundException(message='User does not exist.')
-
+    
     if bcrypt.check_password_hash(user.password, data.password):
         auth_token = user.encode_auth_token()
-        return jsonify(message='Successfully logged in.', auth_token=auth_token.decode())
+        return jsonify(message='Successfully logged in.', auth_token=auth_token)
     else:
         raise InvalidPayloadException(message="Incorrect password.")
 
