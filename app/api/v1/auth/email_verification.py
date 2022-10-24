@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import current_app, jsonify, Blueprint
+from flask import request, current_app, jsonify, Blueprint
 from flask_accept import accept
 
 from app.extensions import bcrypt
@@ -10,7 +10,7 @@ from app.models.user import User
 email_verification_blueprint = Blueprint('email_verification', __name__)
 
 
-@email_verification_blueprint.route('/email_verification/', methods=['GET'])
+@email_verification_blueprint.route('/email_verification', methods=['GET'])
 @accept('application/json')
 @authenticate
 def email_verification(user_id: int):
@@ -29,12 +29,15 @@ def email_verification(user_id: int):
         return jsonify(message='sent email with verification token')
 
 
-@email_verification_blueprint.route('/email_verification/<token>', methods=['GET'])
-def verify_email(token):
+@email_verification_blueprint.route('/email_verification', methods=['POST'])
+@accept('application/json')
+def verify_email():
     """
     Verifies email with given token
     """
-    print('HI!')
+    post_data = request.get_json()
+    token = post_data['token']
+    print(token)
     user_id = User.decode_email_token(token)
     print(user_id)
     # user = User.get(user_id)
