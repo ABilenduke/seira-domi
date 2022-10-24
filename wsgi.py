@@ -1,11 +1,9 @@
 import os
-
-from app import create_app
+from app import create_app, celery
 
 environment = os.getenv("FLASK_ENV") or "production"
-
-app = create_app(environment)
+is_debug = environment != "production"
 
 if __name__ == "__main__":
-    is_debug = environment != "production"
+    app = create_app(celery=celery)
     app.run(debug=is_debug)
